@@ -3,7 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { ROOMS } from "@/lib/rooms";
 import { useInterzone } from "@/lib/store";
+import { generateInteractionResponse } from "@/lib/proceduralText";
 import { clack } from "@/lib/audio";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_app/interzone")({
   component: InterzonePage,
@@ -16,6 +18,7 @@ function InterzonePage() {
   const pushHallucination = useInterzone(s => s.pushHallucination);
   const pushSurveillance = useInterzone(s => s.pushSurveillance);
   const [current, setCurrent] = useState<string>("entry");
+  const [roomResponse, setRoomResponse] = useState<string | null>(null);
   const room = ROOMS[current];
 
   const go = (to: string, mutation?: string, paranoia?: number) => {
@@ -31,7 +34,18 @@ function InterzonePage() {
       setCurrent("corridor");
       return;
     }
+    setRoomResponse(null);
     setCurrent(to);
+  };
+
+  const probeRoom = () => {
+    clack();
+    const response = generateInteractionResponse(room.title, descent, useInterzone.getState().paranoia);
+    setRoomResponse(response);
+    pushHallucination(`[FIELD PROBE · ${room.title}] ${response}`);
+    if (Math.random() > 0.55) {
+      pushSurveillance(`Unscheduled environmental probe recorded at “${room.title}”.`, descent >= 6 ? "HIGH" : "MEDIUM");
+    }
   };
 
   return (
@@ -54,6 +68,19 @@ function InterzonePage() {
           <p className="text-iz-bone font-mono leading-relaxed text-sm sm:text-base mb-8 iz-melt">
             {room.body}
           </p>
+          <AnimatePresence mode="wait">
+            {roomResponse && (
+              <motion.aside
+                key={roomResponse}
+                initial={{ opacity: 0, filter: "blur(7px)" }}
+                animate={{ opacity: 1, filter: "blur(0px)" }}
+                exit={{ opacity: 0 }}
+                className="mb-5 border-l-2 border-iz-pus bg-iz-ink/50 px-4 py-3 text-xs leading-relaxed text-iz-pus font-mono"
+              >
+                {roomResponse}
+              </motion.aside>
+            )}
+          </AnimatePresence>
           <div className="space-y-2">
             {room.choices.map((c, idx) => (
               <motion.button
@@ -66,6 +93,14 @@ function InterzonePage() {
                 <span className="group-hover:text-iz-pus transition-colors">{c.label}</span>
               </motion.button>
             ))}
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={probeRoom}
+              className="mt-3 w-full rounded-none border border-dashed border-iz-vein text-xs uppercase tracking-widest text-muted-foreground hover:border-iz-pus hover:bg-iz-vein/20 hover:text-iz-pus"
+            >
+              Probe the room for unauthorized activity
+            </Button>
           </div>
         </motion.article>
       </AnimatePresence>
