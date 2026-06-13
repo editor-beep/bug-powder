@@ -65,7 +65,7 @@ export const useInterzone = create<InterzoneState>()(
       mutations: [],
       ending: null,
       surveillanceLogs: [
-        { id: crypto.randomUUID(), severity: "LOW", message: "SYS_INIT: Interzone typewriter link established.", at: Date.now() },
+        { id: "sys-init", severity: "LOW", message: "SYS_INIT: Interzone typewriter link established.", at: 0 },
       ],
       hallucinations: [],
 
@@ -157,7 +157,7 @@ export const useInterzone = create<InterzoneState>()(
         surveillanceLogs: [{ id: crypto.randomUUID(), severity: "LOW", message: "SYS_RESET: Cycle terminated. Subject reinitialized.", at: Date.now() }],
       }),
     }),
-    { name: "interzone-feed-v1" }
+    { name: "interzone-feed-v1", skipHydration: true }
   )
 );
 

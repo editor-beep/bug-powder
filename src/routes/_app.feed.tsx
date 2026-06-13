@@ -6,6 +6,7 @@ import { clack } from "@/lib/audio";
 import { VeinMeter } from "@/components/VeinMeter";
 import { FeedStream } from "@/components/FeedStream";
 import { SurveillancePanel } from "@/components/SurveillancePanel";
+import { Button } from "@/components/ui/button";
 import { Flame, Eye, Activity } from "lucide-react";
 
 export const Route = createFileRoute("/_app/feed")({
@@ -21,10 +22,19 @@ function FeedPage() {
   const descent = useInterzone(s => s.descent);
   const paranoia = useInterzone(s => s.paranoia);
   const takeFix = useInterzone(s => s.takeFix);
+  const pushHallucination = useInterzone(s => s.pushHallucination);
+  const pushSurveillance = useInterzone(s => s.pushSurveillance);
 
   const onFix = (sub: SubstanceKey) => {
     const text = generateHallucination({ substance: sub, descent, paranoia });
     takeFix(sub, `[FIX · ${sub.replace("_", " ").toUpperCase()}] ${text}`);
+    clack();
+  };
+
+  const requestTransmission = () => {
+    const text = generateHallucination({ descent, paranoia });
+    pushHallucination(`[UNSOLICITED TRANSMISSION] ${text}`);
+    pushSurveillance("Subject requested material outside the approved dosage schedule.", paranoia > 55 ? "HIGH" : "MEDIUM");
     clack();
   };
 
@@ -57,6 +67,14 @@ function FeedPage() {
           <Link to="/fix" className="text-muted-foreground hover:text-iz-blood transition-colors">Ritual Mode →</Link>
         </header>
         <FeedStream />
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={requestTransmission}
+          className="mt-5 w-full rounded-none border border-dashed border-iz-vein text-[10px] uppercase tracking-widest text-muted-foreground hover:border-iz-pus hover:bg-iz-vein/20 hover:text-iz-pus"
+        >
+          Request unauthorized transmission
+        </Button>
         <p className="mt-6 text-[10px] text-iz-vein italic text-center">
           * Continuous interaction feeds the typewriter parasite. Do not look away.
         </p>

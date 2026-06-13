@@ -9,6 +9,10 @@ export function InterzoneLayout() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    void useInterzone.persist.rehydrate();
+  }, []);
+
   // Apply descent + mutation classes to <body>
   useEffect(() => {
     document.documentElement.style.setProperty("--descent", String(descent));
