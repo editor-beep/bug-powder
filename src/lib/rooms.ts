@@ -25,6 +25,7 @@ export const ROOMS: Record<string, Room> = {
       { label: "OPERATIONS.", to: "operations", paranoia: 6 },
       { label: "The handprint.", to: "handprint", paranoia: 10 },
       { label: "Back to customs.", to: "entry" },
+      { label: "Follow the sound inside the wallpaper.", to: "archive", paranoia: 9 },
     ],
   },
   benway: {
@@ -45,6 +46,7 @@ export const ROOMS: Record<string, Room> = {
       { label: "Follow the boy.", to: "mugwump", paranoia: 12 },
       { label: "Buy a tongue.", to: "tongue-room", paranoia: 6 },
       { label: "Leave.", to: "corridor" },
+      { label: "Trade your reflection for a sealed memo.", to: "archive", paranoia: 14 },
     ],
   },
   operations: {
@@ -107,6 +109,28 @@ export const ROOMS: Record<string, Room> = {
       { label: "Stop.", to: "operations", paranoia: 20 },
     ],
   },
+  archive: {
+    slug: "archive",
+    title: "The Municipal Fever Archive",
+    body: "Metal drawers rise beyond the ceiling, each labeled with a symptom that has not happened yet. A larval archivist offers you three index cards: YOUR FIRST LIE, YOUR NEXT FACE, and THE NOISE BEHIND THE FEED.",
+    choices: [
+      { label: "Open YOUR FIRST LIE.", to: "mirror-depot", paranoia: 8 },
+      { label: "Open YOUR NEXT FACE.", to: "reconditioning", paranoia: 12, mutation: "flesh-bg" },
+      { label: "Open THE NOISE BEHIND THE FEED.", to: "typewriter-room", paranoia: 18 },
+      { label: "Misfile yourself and leave.", to: "corridor", paranoia: -4 },
+    ],
+  },
+  "mirror-depot": {
+    slug: "mirror-depot",
+    title: "Depot of Confiscated Reflections",
+    body: "Hundreds of mirrors face the wall as punishment. One turns itself around. Your reflection is wearing a customs uniform and looks exhausted. It mouths a warning, then produces a key from somewhere behind its teeth.",
+    requiresDescent: 4,
+    choices: [
+      { label: "Accept the key.", to: "typewriter-room", paranoia: 16, mutation: "typewriter-keys" },
+      { label: "Switch places with the reflection.", to: "ending-reflection", paranoia: 24 },
+      { label: "Turn the mirror back around.", to: "archive", paranoia: 5 },
+    ],
+  },
   // Terminal "ending" rooms loop back gently:
   "ending-mugwumps": {
     slug: "ending-mugwumps",
@@ -125,5 +149,11 @@ export const ROOMS: Record<string, Room> = {
     title: "Continuous Operation",
     body: "You continue typing. The page does not end. You are the page. Welcome.",
     choices: [{ label: "Return to the Feed.", to: "entry" }],
+  },
+  "ending-reflection": {
+    slug: "ending-reflection",
+    title: "Employee of the Glass",
+    body: "The exchange is instantaneous and administratively valid. From behind the mirror, you watch your replacement straighten its uniform and leave. It has your habits but better posture. Your shift begins now.",
+    choices: [{ label: "Tap on the glass until morning.", to: "entry" }],
   },
 };
