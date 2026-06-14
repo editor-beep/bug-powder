@@ -19,12 +19,7 @@ export const Route = createFileRoute("/")({
 function Landing() {
   return (
     <div className="iz-scanlines iz-noise min-h-dvh w-full max-w-full overflow-x-hidden flex flex-col items-center justify-center px-4 py-16 text-center">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9, filter: "blur(8px)" }}
-        animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-        transition={{ duration: 1.4 }}
-        className="w-full max-w-2xl"
-      >
+      <div className="w-full max-w-2xl iz-drift-in">
         <Skull className="w-12 h-12 text-iz-blood mx-auto mb-6 iz-flicker" />
         <h1 className="font-display text-[clamp(2.25rem,13vw,4.5rem)] text-iz-bone iz-glitch-text mb-4 tracking-tight break-words leading-none">
           INTERZONE_FEED
@@ -53,7 +48,7 @@ function Landing() {
         <p className="text-[10px] text-iz-vein mt-10 font-mono uppercase tracking-widest">
           By entering you consent to monitoring · No data leaves this terminal without permission
         </p>
-      </motion.div>
+      </div>
     </div>
   );
 }
