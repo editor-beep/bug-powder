@@ -12,41 +12,62 @@ export const Route = createFileRoute("/_app/fix")({
 });
 
 const SUB_META: Record<SubstanceKey, { label: string; tagline: string; color: string }> = {
-  bug_powder: { label: "Bug Powder", tagline: "Fine green dust. For the auditor's voice.", color: "var(--iz-bug)" },
-  black_meat: { label: "Black Meat", tagline: "Translucent. Best chewed slowly.", color: "var(--iz-blood)" },
-  slow_speed: { label: "Slow-Speed", tagline: "Time becomes a wet bandage.", color: "var(--iz-bruise)" },
-  flesh_juice: { label: "Flesh Juice", tagline: "A warmth with paperwork attached.", color: "var(--iz-pus)" },
+  bug_powder: {
+    label: "Bug Powder",
+    tagline: "Fine green dust. For the auditor's voice.",
+    color: "var(--iz-bug)",
+  },
+  black_meat: {
+    label: "Black Meat",
+    tagline: "Translucent. Best chewed slowly.",
+    color: "var(--iz-blood)",
+  },
+  slow_speed: {
+    label: "Slow-Speed",
+    tagline: "Time becomes a wet bandage.",
+    color: "var(--iz-bruise)",
+  },
+  flesh_juice: {
+    label: "Flesh Juice",
+    tagline: "A warmth with paperwork attached.",
+    color: "var(--iz-pus)",
+  },
 };
 
 function FixPage() {
-  const dependence = useInterzone(s => s.dependence);
-  const descent = useInterzone(s => s.descent);
-  const paranoia = useInterzone(s => s.paranoia);
-  const takeFix = useInterzone(s => s.takeFix);
+  const dependence = useInterzone((s) => s.dependence);
+  const descent = useInterzone((s) => s.descent);
+  const paranoia = useInterzone((s) => s.paranoia);
+  const takeFix = useInterzone((s) => s.takeFix);
   const [administering, setAdministering] = useState<SubstanceKey | null>(null);
   const [lastVignette, setLastVignette] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleAdminister = async (sub: SubstanceKey) => {
+    setLastVignette(null);
     setAdministering(sub);
     clack();
-    await new Promise(r => setTimeout(r, 1400));
+    await new Promise((r) => setTimeout(r, 350));
     const text = generateHallucination({ substance: sub, descent, paranoia });
     takeFix(sub, `[FIX · ${sub.replace("_", " ").toUpperCase()}] ${text}`);
     setLastVignette(text);
-    await new Promise(r => setTimeout(r, 2400));
+    await new Promise((r) => setTimeout(r, 1100));
     setAdministering(null);
   };
 
   return (
     <div className="max-w-4xl mx-auto">
       <header className="mb-8 text-center">
-        <h1 className="font-display text-3xl sm:text-4xl text-iz-bone iz-glitch-text">The Fix Panel</h1>
-        <p className="text-muted-foreground text-xs uppercase tracking-widest mt-2">Choose your descent · Each administration is recorded</p>
+        <h1 className="font-display text-3xl sm:text-4xl text-iz-bone iz-glitch-text">
+          The Fix Panel
+        </h1>
+        <p className="text-muted-foreground text-xs uppercase tracking-widest mt-2">
+          Choose your descent · Each administration is recorded
+        </p>
       </header>
 
       <div className="grid sm:grid-cols-2 gap-4">
-        {(Object.keys(SUB_META) as SubstanceKey[]).map(sub => {
+        {(Object.keys(SUB_META) as SubstanceKey[]).map((sub) => {
           const meta = SUB_META[sub];
           const level = dependence[sub];
           return (
@@ -58,8 +79,12 @@ function FixPage() {
               disabled={administering !== null}
               className="text-left bg-iz-void/70 border border-iz-vein hover:border-iz-blood p-5 transition-all relative overflow-hidden disabled:opacity-40 disabled:cursor-wait group"
             >
-              <div className="absolute inset-0 opacity-20 pointer-events-none"
-                style={{ background: `radial-gradient(circle at 80% 20%, ${meta.color}, transparent 60%)` }} />
+              <div
+                className="absolute inset-0 opacity-20 pointer-events-none"
+                style={{
+                  background: `radial-gradient(circle at 80% 20%, ${meta.color}, transparent 60%)`,
+                }}
+              />
               <div className="flex items-start justify-between mb-3 relative">
                 <h3 className="font-display text-xl text-iz-bone">{meta.label}</h3>
                 <Syringe className="w-4 h-4 text-iz-blood group-hover:rotate-12 transition-transform" />
@@ -72,7 +97,9 @@ function FixPage() {
                   animate={{ width: `${level}%` }}
                 />
               </div>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-2">{Math.round(level)}% dependence</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-2">
+                {Math.round(level)}% dependence
+              </p>
             </motion.button>
           );
         })}
@@ -89,7 +116,9 @@ function FixPage() {
       <AnimatePresence>
         {administering && (
           <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] bg-iz-ink/95 flex items-center justify-center p-6 backdrop-blur-md"
           >
             <div className="max-w-2xl text-center">
@@ -100,7 +129,9 @@ function FixPage() {
               >
                 <Syringe className="w-16 h-16 text-iz-blood mx-auto iz-flicker" />
               </motion.div>
-              <p className="font-display text-iz-pus text-sm uppercase tracking-[0.4em] mb-4">Administering · {SUB_META[administering].label}</p>
+              <p className="font-display text-iz-pus text-sm uppercase tracking-[0.4em] mb-4">
+                Administering · {SUB_META[administering].label}
+              </p>
               {lastVignette ? (
                 <motion.p
                   initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
@@ -110,7 +141,9 @@ function FixPage() {
                   {lastVignette}
                 </motion.p>
               ) : (
-                <p className="text-muted-foreground font-mono text-sm animate-pulse">Initializing biological link...</p>
+                <p className="text-muted-foreground font-mono text-sm animate-pulse">
+                  Initializing biological link...
+                </p>
               )}
             </div>
           </motion.div>

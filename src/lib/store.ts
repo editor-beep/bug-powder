@@ -16,7 +16,12 @@ export interface InterzoneState {
   mutations: string[];
   ending: string | null;
   // Logs
-  surveillanceLogs: Array<{ id: string; severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"; message: string; at: number }>;
+  surveillanceLogs: Array<{
+    id: string;
+    severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+    message: string;
+    at: number;
+  }>;
   hallucinations: Array<{ id: string; text: string; at: number; substance?: SubstanceKey }>;
   // Actions
   takeFix: (sub: SubstanceKey, hallucinationText: string) => void;
@@ -31,24 +36,56 @@ export interface InterzoneState {
 }
 
 const initialDeps: Record<SubstanceKey, number> = {
-  bug_powder: 0, black_meat: 0, slow_speed: 0, flesh_juice: 0,
+  bug_powder: 0,
+  black_meat: 0,
+  slow_speed: 0,
+  flesh_juice: 0,
 };
 
-const MUTATION_RULES: Array<{ slug: string; check: (s: InterzoneState) => boolean; label: string }> = [
-  { slug: "centipede-cursor", label: "Centipede Secretary", check: s => s.dependence.bug_powder >= 60 },
-  { slug: "mugwump-eyes", label: "Mugwump Eyes", check: s => s.dependence.black_meat >= 60 },
-  { slug: "melted-nav", label: "Melted Bureaucracy", check: s => s.dependence.slow_speed >= 60 },
-  { slug: "flesh-bg", label: "Fleshly Wallpaper", check: s => s.dependence.flesh_juice >= 60 },
-  { slug: "typewriter-keys", label: "Typewriter Parasite", check: s => s.descent >= 5 },
-  { slug: "interzone-citizen", label: "Citizen of Interzone", check: s => s.descent >= 8 },
-  { slug: "nova-police-target", label: "Nova Police Target", check: s => s.paranoia >= 80 },
+const initialHallucinations: InterzoneState["hallucinations"] = [
+  {
+    id: "feed-seed-001",
+    text: "[OPENING TRANSMISSION] The typewriter parasite clears its throat. Choose a fix, request an unauthorized transmission, or wait for the Bureau to choose for you.",
+    at: 0,
+  },
+  {
+    id: "feed-seed-002",
+    text: "[STORYLINE] Your file has been pre-opened in Interzone. Every administration deepens the descent and unlocks new corridors, mutations, and endings.",
+    at: 0,
+  },
+];
+
+function makeId(prefix = "iz") {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+const MUTATION_RULES: Array<{
+  slug: string;
+  check: (s: InterzoneState) => boolean;
+  label: string;
+}> = [
+  {
+    slug: "centipede-cursor",
+    label: "Centipede Secretary",
+    check: (s) => s.dependence.bug_powder >= 60,
+  },
+  { slug: "mugwump-eyes", label: "Mugwump Eyes", check: (s) => s.dependence.black_meat >= 60 },
+  { slug: "melted-nav", label: "Melted Bureaucracy", check: (s) => s.dependence.slow_speed >= 60 },
+  { slug: "flesh-bg", label: "Fleshly Wallpaper", check: (s) => s.dependence.flesh_juice >= 60 },
+  { slug: "typewriter-keys", label: "Typewriter Parasite", check: (s) => s.descent >= 5 },
+  { slug: "interzone-citizen", label: "Citizen of Interzone", check: (s) => s.descent >= 8 },
+  { slug: "nova-police-target", label: "Nova Police Target", check: (s) => s.paranoia >= 80 },
 ];
 
 const ENDINGS: Array<{ slug: string; check: (s: InterzoneState) => boolean }> = [
-  { slug: "reconditioned", check: s => s.descent >= 10 && s.paranoia < 40 },
-  { slug: "consumed-by-mugwumps", check: s => s.descent >= 10 && s.dependence.black_meat >= 90 },
-  { slug: "became-typewriter", check: s => s.descent >= 10 && s.dependence.bug_powder >= 90 },
-  { slug: "vanished-into-interzone", check: s => s.descent >= 10 && s.paranoia >= 80 },
+  { slug: "reconditioned", check: (s) => s.descent >= 10 && s.paranoia < 40 },
+  { slug: "consumed-by-mugwumps", check: (s) => s.descent >= 10 && s.dependence.black_meat >= 90 },
+  { slug: "became-typewriter", check: (s) => s.descent >= 10 && s.dependence.bug_powder >= 90 },
+  { slug: "vanished-into-interzone", check: (s) => s.descent >= 10 && s.paranoia >= 80 },
 ];
 
 export const useInterzone = create<InterzoneState>()(
@@ -65,14 +102,22 @@ export const useInterzone = create<InterzoneState>()(
       mutations: [],
       ending: null,
       surveillanceLogs: [
-        { id: "sys-init", severity: "LOW", message: "SYS_INIT: Interzone typewriter link established.", at: 0 },
+        {
+          id: "sys-init",
+          severity: "LOW",
+          message: "SYS_INIT: Interzone typewriter link established.",
+          at: 0,
+        },
       ],
-      hallucinations: [],
+      hallucinations: initialHallucinations,
 
       takeFix: (sub, text) => {
         const now = Date.now();
         const s = get();
-        const newDep = { ...s.dependence, [sub]: Math.min(100, s.dependence[sub] + 12 + Math.random() * 8) };
+        const newDep = {
+          ...s.dependence,
+          [sub]: Math.min(100, s.dependence[sub] + 12 + Math.random() * 8),
+        };
         const totalDep = Object.values(newDep).reduce((a, b) => a + b, 0);
         const newDescent = Math.min(10, 1 + Math.floor(totalDep / 40));
         const newParanoia = Math.min(100, s.paranoia + 3 + Math.floor(Math.random() * 5));
@@ -87,7 +132,7 @@ export const useInterzone = create<InterzoneState>()(
           lastFixAt: now,
           withdrawal: false,
           hallucinations: [
-            { id: crypto.randomUUID(), text, at: now, substance: sub },
+            { id: makeId("hallucination"), text, at: now, substance: sub },
             ...s.hallucinations,
           ].slice(0, 50),
         });
@@ -109,18 +154,18 @@ export const useInterzone = create<InterzoneState>()(
       },
 
       pushSurveillance: (msg, severity = "LOW") => {
-        set(s => ({
+        set((s) => ({
           surveillanceLogs: [
-            { id: crypto.randomUUID(), severity, message: msg, at: Date.now() },
+            { id: makeId("surveillance"), severity, message: msg, at: Date.now() },
             ...s.surveillanceLogs,
           ].slice(0, 30),
         }));
       },
 
       pushHallucination: (text, substance) => {
-        set(s => ({
+        set((s) => ({
           hallucinations: [
-            { id: crypto.randomUUID(), text, at: Date.now(), substance },
+            { id: makeId("hallucination"), text, at: Date.now(), substance },
             ...s.hallucinations,
           ].slice(0, 50),
         }));
@@ -130,7 +175,7 @@ export const useInterzone = create<InterzoneState>()(
         const s = get();
         if (s.mutations.includes(slug)) return false;
         set({ mutations: [...s.mutations, slug] });
-        const rule = MUTATION_RULES.find(r => r.slug === slug);
+        const rule = MUTATION_RULES.find((r) => r.slug === slug);
         get().pushSurveillance(`MUTATION UNLOCKED: ${rule?.label ?? slug}`, "HIGH");
         return true;
       },
@@ -144,25 +189,58 @@ export const useInterzone = create<InterzoneState>()(
         const hoursSince = (Date.now() - s.lastFixAt) / 3600000;
         if (hoursSince > 26 && !s.withdrawal && s.streak > 0) {
           set({ withdrawal: true, streak: 0, paranoia: Math.min(100, s.paranoia + 15) });
-          get().pushSurveillance("WITHDRAWAL DETECTED. Subject's vitals destabilizing.", "CRITICAL");
+          get().pushSurveillance(
+            "WITHDRAWAL DETECTED. Subject's vitals destabilizing.",
+            "CRITICAL",
+          );
         }
       },
 
       exitWithdrawal: () => set({ withdrawal: false }),
 
-      resetAll: () => set({
-        dependence: { ...initialDeps },
-        descent: 1, paranoia: 10, streak: 0, lastFixAt: null, withdrawal: false,
-        mutations: [], ending: null, hallucinations: [],
-        surveillanceLogs: [{ id: crypto.randomUUID(), severity: "LOW", message: "SYS_RESET: Cycle terminated. Subject reinitialized.", at: Date.now() }],
-      }),
+      resetAll: () =>
+        set({
+          dependence: { ...initialDeps },
+          descent: 1,
+          paranoia: 10,
+          streak: 0,
+          lastFixAt: null,
+          withdrawal: false,
+          mutations: [],
+          ending: null,
+          hallucinations: initialHallucinations,
+          surveillanceLogs: [
+            {
+              id: makeId("surveillance"),
+              severity: "LOW",
+              message: "SYS_RESET: Cycle terminated. Subject reinitialized.",
+              at: Date.now(),
+            },
+          ],
+        }),
     }),
-    { name: "interzone-feed-v1", skipHydration: true }
-  )
+    {
+      name: "interzone-feed-v1",
+      skipHydration: true,
+      merge: (persisted, current) => {
+        const stored = persisted as Partial<InterzoneState> | undefined;
+        return {
+          ...current,
+          ...stored,
+          hallucinations: stored?.hallucinations?.length
+            ? stored.hallucinations
+            : initialHallucinations,
+          surveillanceLogs: stored?.surveillanceLogs?.length
+            ? stored.surveillanceLogs
+            : current.surveillanceLogs,
+        };
+      },
+    },
+  ),
 );
 
 export const MUTATION_LABELS: Record<string, string> = Object.fromEntries(
-  MUTATION_RULES.map(r => [r.slug, r.label])
+  MUTATION_RULES.map((r) => [r.slug, r.label]),
 );
 
 export const ENDING_TEXT: Record<string, { title: string; body: string }> = {
