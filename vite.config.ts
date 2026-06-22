@@ -6,17 +6,21 @@
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
-// Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-// Nitro uses the same web-compatible entry to emit Vercel Build Output API artifacts.
+// Deploy to Vercel via Nitro's `vercel` preset.
+//
+// IMPORTANT: do NOT add a custom `nitro.serverEntry`. Pointing Nitro at a
+// hand-written handler triggers a second server bundling pass that re-resolves
+// TanStack Start's client manifest *without* the captured client build. That
+// pass emits an empty manifest whose `clientEntry` is the dev-only virtual path
+// `/@id/virtual:tanstack-start-client-entry`. In production that path 404s, the
+// app never hydrates, and every button/link becomes inert. Let TanStack Start
+// own the server build; route our SSR error wrapper through `server.entry`
+// instead (src/server.ts), which is part of the same coherent build.
 export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
   nitro: {
     preset: "vercel",
-    serverEntry: {
-      handler: "./src/vercel.ts",
-      format: "web",
-    },
   },
 });
